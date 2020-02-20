@@ -1,0 +1,87 @@
+#! /bin/ksh
+#/**************************************************************
+#* FILE NAME:   Email_script.ksh
+#*
+#* AUTHOR:  Aakarsh Raj            DATE: February, 20 2020
+#*
+#* USAGE:
+#* This script will send an attachment to the specified distribution list
+#* MODIFICATION LOG:
+#*
+#* NAME         DATE            MODIFICATION
+#* =========    =====           ================
+#*
+#**************************************************************/
+
+###########################################################
+#CONSTRUCTING THE COMMAND LINE ARGUMENT FOR THIS SCRIPT
+#sh /global/informatica/102/server/infa_shared/ScriptFiles/Email_script.ksh *BILLING__c*.csv $PMTargetFileDir $PMBadFileDir
+#here,
+#$PMTargetFileDir is informatica parameter for path where the success file is stored
+#$PMBadFileDir is informatica parameter for path where the success file is stored
+#example,
+#sh /global/informatica/102/server/infa_shared/ScriptFiles/Email_script.ksh *BILLING__c*.csv /global/informatica/102/server/infa_shared/ScriptFiles/TgtFiles /global/informatica/102/server/infa_shared/ScriptFiles/BadFiles
+###########################################################
+
+#Storing the command line arguments in appropriate varaibles  
+  #file name variable
+   FILE_NAME=$1
+   #success file location variable
+   LOCATION_SUC=$2
+   #error file location variable
+   LOCATION_ERR=$3
+   #receivers email address
+   APP_EMAIL="aakarsh.ra.rajagopalan@partner.bmwgroup.com"
+   EMAIL_SUBJECT="Successfile or Badfile attached"
+   SCRIPT_NAME="Email_script.ksh"
+
+   echo "**************************The task has started for SUCCESS file***********************************"
+   echo "****************************Changing directory to $PMTargetFileDir*****************"
+   cd $LOCATION_SUC
+   echo "***************************the present working directory is***********************"
+   echo $(pwd)
+   echo "***************************the file name is*************************************"
+   echo $FILE_NAME
+   
+   #Calculating the number of lines in the success file
+   NUM_LINES_SUC=$(wc -l < $(echo $(ls -t "$LOCATION_SUC"/$(echo $FILE_NAME) | head -n1) ))
+   echo "*****************************the number of lines in the success files is***********************"
+   echo $NUM_LINES_SUC
+
+  
+   #Conditional statement to perform action only if the file exists	
+   if [[ $NUM_LINES_SUC != 0 ]]
+   then
+   MSSG="$EMAIL_SUBJECT contains succeeded records: $SCRIPT_NAME"
+   echo "This email contains the SFDC success file file" | mailx -s  "$MSSG" -a $(ls -t "$LOCATION_SUC"/$(echo $FILE_NAME) | head -n1) "$APP_EMAIL"
+   fi
+   
+   echo "***************************The task has completed for SUCCESS File******************************"
+   
+
+   echo "**************************The task has started for ERROR file***********************************"
+   echo "****************************Changing directory to $PMBadFileDir*****************"
+   cd $LOCATION_ERR
+   
+   echo "***************************the present working directory is***********************"
+   echo $(pwd)
+   
+   echo "***************************the file name is*************************************"
+   echo $FILE_NAME
+   
+     
+   #Calculating the number of lines in the error file
+   NUM_LINES_ERR=$(wc -l < $(echo $(ls -t "$LOCATION_ERR"/$(echo $FILE_NAME) | head -n1) ))  
+   echo "*****************************the number of lines in the error files is***********************"
+   echo $NUM_LINES_ERR
+   
+      #conditional statement to perform action only if the error file exists
+   if [[ $NUM_LINES_ERR != 0 ]]
+   then
+   MSSG="$EMAIL_SUBJECT contains error records: $SCRIPT_NAME"
+   echo "This email contains the SFDC error file" | mailx -s  "$MSSG" -a $(ls -t "$LOCATION_ERR"/$(echo $FILE_NAME) | head -n1) "$APP_EMAIL"
+   fi
+   exit 0
+   
+   echo "***************************The task has completed for ERROR File******************************"
+   
