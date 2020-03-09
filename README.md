@@ -1,5 +1,5 @@
 # Email_script-Unix
-UNIX korn shell to send email upon execution
+UNIX korn shell to send automated email upon execution of data load workflow
 The steps of execution are as follows:
 
 1. Accept command line arguments. The arguments that should be passed are the File being searched for, the path where the success files resides and finally the path where the error file resides. 
